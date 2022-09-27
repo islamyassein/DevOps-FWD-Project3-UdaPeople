@@ -89,17 +89,13 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: [backend-deps]
+          keys: [backend-build]
       - run:
           name: test-backend unit test
           command: |
             cd backend
             npm install
-            npm audit fix
             npm test
-            mkdir -p ~/test-results/junit/rspec/rspec.xml
-      - store_test_results:
-          path: ~/test-results/junit
           
   # scan-frontend:
   #   docker:
