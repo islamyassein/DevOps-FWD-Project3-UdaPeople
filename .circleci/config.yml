@@ -51,12 +51,14 @@ jobs:
       - run:
           name: Build front-end
           command: |
-            npm i
-            npm run lint
+            cd project/frontend/ && npm install && npm test
+#            npm install
+#            npm init -y
+#            npm run build
       - save_cache:
           paths: [frontend/node_modules]
           key: frontend-build
-          
+
   build-backend:
     docker:
       - image: circleci/node:13.8.0
