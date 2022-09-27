@@ -70,8 +70,7 @@ jobs:
       - run:
           name: Back-end build
           command: |
-            npm i
-            npm run lint
+            cd backend && npm install && npm build
       - save_cache:
           paths: [backend/node_modules]
           key: backend-build
