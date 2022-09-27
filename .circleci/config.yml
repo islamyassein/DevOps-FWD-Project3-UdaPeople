@@ -51,7 +51,8 @@ jobs:
       - run:
           name: Build front-end
           command: |
-            cd frontend && npm install && npm test
+            cd frontend && npm install && npm build
+#            cd frontend && npm install && npm test
 #            npm install
 #            npm init -y
 #            npm run build
