@@ -81,6 +81,8 @@ jobs:
       # Docker image here
     steps:
       - checkout
+      - restore_cache:
+          keys: [frontend-build]
       - run: cd frontend && npm install && npm run test
                 
   test-backend:
