@@ -223,8 +223,8 @@ jobs:
             - "ff:2a:36:47:88:df:cc:df:f2:16:5c:81:f8:b0:83:f6"
       # Install dependencies
       - run: |
-          apt -y update
-          apt -y install jq tar gzip git curl
+          sudo apt -y update
+          sudo apt -y install jq tar gzip git curl
       - install_awscli
       - install_ansible
       # attach workspace
