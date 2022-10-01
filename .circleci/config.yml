@@ -212,7 +212,7 @@ jobs:
 
   configure-infrastructure:
     docker: 
-      - image: python:3.7-alpine3.11
+      - image: cimg/base:stable
       # Docker image here that supports Ansible
     steps:
       # Checkout code from git
@@ -222,11 +222,11 @@ jobs:
           fingerprints:
             - "ff:2a:36:47:88:df:cc:df:f2:16:5c:81:f8:b0:83:f6"
       # Install dependencies
-      - install_awscli
-      - install_ansible
       - run: |
           apt -y update
           apt -y install jq tar gzip git curl
+      - install_awscli
+      - install_ansible
       # attach workspace
       - attach_workspace:
           at: ~/
