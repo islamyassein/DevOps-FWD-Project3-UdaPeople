@@ -22,7 +22,6 @@
   apt:
     name: ["nodejs", "npm", "git"]
     state: latest
-    update_cache: yes
 
 - name: "install pm2 global"
   become: true
@@ -31,6 +30,13 @@
     global: yes
     production: yes
     state: present
+
+- name: "Update cache"
+  become: true
+  become_user: root
+  apt:
+    update_cache: yes
+
 
 - name: "check for environment variables"
   become_user: ubuntu
