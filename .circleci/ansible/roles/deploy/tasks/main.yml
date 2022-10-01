@@ -1,0 +1,42 @@
+- name: "Create udapeople directory"
+  become_user: ubuntu
+  shell: mkdir -p ~/udapeople/
+
+- name: "Stop previous execution"
+  become_user: ubuntu
+  shell: |
+    cd ~/udapeople/    
+    if pm2 monitor main.js | grep "online"; then
+      pm2 stop main.js
+    fi
+
+- name: "Remove previous deployment"
+  become: true
+  file: 
+    path: ~/udapeople/ 
+    state: absent
+
+# - name: "deploy backend app"
+#   become_user: ubuntu
+#   unarchive:
+#     src: ../../backend/app.tar.gz
+#     dest: ~/udapeople/
+#     owner: ubuntu
+#     group: ubuntu
+#     mode: 0755
+
+- name: "deploy backend app"
+  become_user: ubuntu
+  copy:
+    src: ../../backend/
+    dest: ~/udapeople/
+    owner: ubuntu
+    group: ubuntu
+    mode: 0755
+
+- name: "Run backend app"
+  become_user: ubuntu
+  shell: |
+    cd ~/udapeople/
+    npm i    
+    pm2 start main.js --update-env

@@ -1,0 +1,53 @@
+---
+- name: "upgrade packages."
+  become: true
+  apt:
+    upgrade: "yes"
+
+- name: "install python3.6"
+  become: true
+  shell: |
+    apt-get -y install python3.6
+
+- name: "Add Node.js from Nodesource"
+  become: true
+  shell: |
+    apt-get install -y build-essential
+    apt-get install -y curl openssl libssl-dev
+    curl -sL https://deb.nodesource.com/setup_13.x | sudo -E bash -
+    apt-get install -y nodejs
+
+- name: "install dependencies nodejs, npm, git"
+  become: true
+  apt:
+    name: ["nodejs", "npm", "git"]
+    state: latest
+    update_cache: yes
+
+- name: "install pm2 global"
+  become: true
+  npm:
+    name: pm2
+    global: yes
+    production: yes
+    state: present
+
+- name: "check for environment variables"
+  become_user: ubuntu
+  shell: grep -c "^export TYPEORM_CONNECTION" /etc/environment || true
+  register: test_grep
+
+- name: "set environment variables"
+  become: true
+  shell: |
+    echo "# environment variables for udapeople" >> /etc/environment
+    #echo "export NODE_ENV=production" >> /etc/environment
+    #echo "export ENVIRONMENT=production" >> /etc/environment
+    echo "export TYPEORM_CONNECTION={{ lookup('env', 'TYPEORM_CONNECTION') }}" >> /etc/environment
+    echo "export TYPEORM_ENTITIES=\"./modules/domain/**/*.entity*.{ts,js}"\" >> /etc/environment
+    echo "export TYPEORM_HOST={{ lookup('env', 'TYPEORM_HOST') }}" >> /etc/environment
+    echo "export TYPEORM_PORT={{ lookup('env', 'TYPEORM_PORT') }}" >> /etc/environment
+    echo "export TYPEORM_USERNAME={{ lookup('env', 'TYPEORM_USERNAME') }}" >> /etc/environment
+    echo "export TYPEORM_PASSWORD={{ lookup('env', 'TYPEORM_PASSWORD') }}" >> /etc/environment
+    echo "export TYPEORM_DATABASE={{ lookup('env', 'TYPEORM_DATABASE') }}" >> /etc/environment
+  when: test_grep.stdout == "0"
