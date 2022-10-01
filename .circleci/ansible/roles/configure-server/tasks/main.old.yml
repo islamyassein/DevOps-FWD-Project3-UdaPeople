@@ -1,19 +1,41 @@
 ---
+- name: "upgrade packages."
+  become: true
+  apt:
+    upgrade: "yes"
+
+- name: "install python3.6"
+  become: true
+  shell: |
+    apt-get -y install python3.6
+
 - name: "Add Node.js from Nodesource"
   become: true
   shell: |
+    apt-get install -y build-essential
+    apt-get install -y curl openssl libssl-dev
     curl -sL https://deb.nodesource.com/setup_13.x | sudo -E bash -
-- name: "Install Node.js 13"
+    apt-get install -y nodejs
+
+- name: "install dependencies nodejs, npm, git"
   become: true
   apt:
-    name: ["nodejs"]
+    name: ["nodejs", "npm", "git"]
     state: latest
-    update_cache: yes
 
-- name: "Install PM2 Globally"
+- name: "install pm2 global"
+  become: true
   npm:
     name: pm2
     global: yes
+    production: yes
+    state: present
+
+- name: "Update cache"
+  become_user: root
+  apt:
+    update_cache: yes
+
 
 - name: "check for environment variables"
   become_user: ubuntu
