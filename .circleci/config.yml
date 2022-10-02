@@ -73,6 +73,16 @@ commands:
             sudo add-apt-repository --yes --update ppa:ansible/ansible
             sudo apt install ansible -y
 
+  install_nodejs:
+    description: "install nodejs 13 from NodeSource"
+    steps:
+      - run:
+        name: "install nodejs 13 from NodeSource"
+        command: |
+              apt -y install jq tar gzip git curl
+              curl -fsSL https://deb.nodesource.com/setup_13.x | sudo -E bash -
+              sudo apt-get install -y nodejs
+
   slack_notify_on_faliure:
     steps:
       - slack/notify:
@@ -206,8 +216,6 @@ jobs:
       
       - slack_notify_on_faliure
 
-
-
   deploy-infrastructure:
     docker: 
       - image: amazon/aws-cli
@@ -293,7 +301,6 @@ jobs:
       # Here's where you will add some code to rollback on failure
       - destroy-environment
 
-
   run-migrations:
     docker:
       # Docker image here that supports NodeJS
@@ -313,6 +320,7 @@ jobs:
             cd backend
             npm i
             npm run migrations > migration.log
+
       - run:
           name: Send migration results to kvdb
           command: |
@@ -327,52 +335,38 @@ jobs:
   deploy-frontend:
     docker:
       # Docker image here that supports AWS CLI
-      - image: amazon/aws-cli
+      # - image: amazon/aws-cli
+      - image: cimg/base:stable
     steps:
       - checkout
+      - install_awscli
+      - install_nodejs
+      - restore_cache:
+          keys: [frontend-build]
       - run:
           name: Install dependencies
           command: |
-            curl -sL https://rpm.nodesource.com/setup_12.x | bash -
-            yum -y install nodejs npm tar gzip jq git
+            cd frontend
+            npm install
       - run:
           name: Get backend url
           command: |
-            BACKEND_IP=`curl -H "token: e38aee29-a976-4696-843d-2d115c52219a" --request GET https://api.memstash.io/values/BACKEND_IP_${CIRCLE_WORKFLOW_ID:0:7}`
-            export API_URL="http://${BACKEND_IP}:3030"
-            echo "${API_URL}"
-      - run:
-          name: Build frontend
-          command: |            
-            cd frontend
-            npm i
-            BACKEND_IP=`curl -H "token: e38aee29-a976-4696-843d-2d115c52219a" --request GET https://api.memstash.io/values/BACKEND_IP_${CIRCLE_WORKFLOW_ID:0:7}`
-            export API_URL="http://${BACKEND_IP}:3030"
-            export NODE_ENV=production
-            #npm install webpack
-            #npm install webpack-cli
-            npm run build:prod
+            BACKEND_PUBLIC_IP=$(aws ec2 describe-instances \
+              --filters "Name=tag:Name,Values=UdaPeople-BackEnd-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --query 'Reservations[*].Instances[*].PublicIpAddress' \
+              --output text)
+            echo "API_URL=http://${BACKEND_PUBLIC_IP}:3030" >> frontend/.env
+            cat frontend/.env
       - run:
           name: Deploy frontend objects
           command: |
             cd frontend
-            #cp -r node_modules ./dist/
-            cp .env ./dist/
-            # deploy to s3 bucket
-            aws s3 cp ./dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
-      - run:
-          name: Create S3 bucket url
-          command: |
-            LOCATION=`aws s3api get-bucket-location --bucket udapeople-${CIRCLE_WORKFLOW_ID:0:7} --output text | tr -d '\n'`
-            S3_URL="udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-${LOCATION}.amazonaws.com/index.html"
-            echo $S3_URL
-            curl -H "Content-Type: text/plain" -H "token: e38aee29-a976-4696-843d-2d115c52219a" \
-            --request PUT --data "$S3_URL" \
-            https://api.memstash.io/values/S3_URL_${CIRCLE_WORKFLOW_ID:0:7}
-      
-      # Here's where you will add some code to rollback on failure    
-      - revert-migrations
+            npm run build
+            aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
+
       - destroy-environment
+      
+      - revert-migrations
           
   deploy-backend:
     docker:
@@ -420,8 +414,6 @@ jobs:
       # Here's where you will add some code to rollback on failure  
       - destroy-environment
       # - revert-migrations
-
-
 
   smoke-test:
     docker:
