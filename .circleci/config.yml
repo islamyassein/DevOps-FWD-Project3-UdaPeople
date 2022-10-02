@@ -258,16 +258,21 @@ jobs:
     steps:
       # Checkout code from git
       - checkout
+      # Install dependencies
+      - run:
+          name: Install dependencies
+          command : |
+            sudo apt -y update
+            sudo apt -y install jq tar gzip git curl
+
+      - install_awscli
+      - install_ansible
+
       # Add ssh keys with fingerprint
       - add_ssh_keys:
           fingerprints:
             - "ff:2a:36:47:88:df:cc:df:f2:16:5c:81:f8:b0:83:f6"
-      # Install dependencies
-      - run: |
-          sudo apt -y update
-          sudo apt -y install jq tar gzip git curl
-      - install_awscli
-      - install_ansible
+            
       # attach workspace
       - attach_workspace:
           at: ~/
