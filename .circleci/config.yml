@@ -253,10 +253,7 @@ jobs:
       - install_awscli
       - restore_cache:
           keys: [backend-build]
-      - run:
-          name: Install dependencies
-          command: |
-            yum -y install nodejs npm tar gzip jq gi
+          
       - run:
           name: Run migrations
           command: |
