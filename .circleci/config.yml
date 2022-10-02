@@ -78,16 +78,17 @@ jobs:
       - image: cimg/node:13.8.0
     steps:
       - checkout
-      - restore_cache:
-          keys: [frontend-build]
+
+      - run:
+          name: Install Prerequisites
+          command: |            
+            sudo apt -y install jq tar gzip git curl
+
       - run:
           name: Build front-end
           command: |
-            cd frontend && npm install && npm build
-#            cd frontend && npm install && npm test
-#            npm install
-#            npm init -y
-#            npm run build
+            cd frontend && npm install && npm run build
+
       - save_cache:
           paths: [frontend/node_modules]
           key: frontend-build
@@ -97,12 +98,17 @@ jobs:
       - image: cimg/node:13.8.0
     steps:
       - checkout
-      - restore_cache:
-          keys: [backend-build]
+
       - run:
-          name: Back-end build
+          name: Install Prerequisites
           command: |
-            cd backend && npm install && npm build
+            sudo apt -y install jq tar gzip git curl
+
+      - run:
+          name: Back-End build
+          command: |
+            cd backend && npm install && npm run build
+
       - save_cache:
           paths: [backend/node_modules]
           key: backend-build
@@ -129,7 +135,7 @@ jobs:
           command: |
             cd backend
             npm install
-            npm test
+            npm run test
           
   scan-frontend:
     docker:
@@ -138,6 +144,10 @@ jobs:
     steps:
       # Checkout code from git
       - checkout
+      - run:
+          name: Install Prerequisites
+          command: |
+            sudo apt -y install jq tar gzip git curl
       # Restore from cache
       - restore_cache:
           keys: [frontend-build]
@@ -145,9 +155,10 @@ jobs:
           name:  Scan-Frontend
           command: |
             cd frontend
-            npm install
-            npm audit fix --force --audit-level=critical
             npm audit --audit-level=critical
+#           npm install
+#           npm audit fix --force --audit-level=critical
+#           npm audit --audit-level=critical
 
   scan-backend:
     docker:
@@ -161,10 +172,11 @@ jobs:
           name: scan-backend
           command: |
             cd backend
-            npm install
-            npm audit fix --force --audit-level=critical
-            npm audit fix --force --audit-level=critical
             npm audit --audit-level=critical
+#           npm install
+#           npm audit fix --force --audit-level=critical
+#           npm audit fix --force --audit-level=critical
+#           npm audit --audit-level=critical
 
 
   deploy-infrastructure:
@@ -251,9 +263,10 @@ jobs:
       # Checkout code from git
       - checkout
       - install_awscli
+
       - restore_cache:
           keys: [backend-build]
-          
+
       - run:
           name: Run migrations
           command: |
