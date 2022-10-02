@@ -1,11 +1,13 @@
 ---
 - name: "upgrade packages."
   become: true
+  become_method: sudo
   shell:
     sudo apt-get update
 
 - name: "install dependencies."
   become: true
+  become_method: sudo
   apt:
     name: ["nodejs", "npm"]
     state: latest
@@ -13,6 +15,7 @@
 
 - name: "install pm2"
   become: true
+  become_method: sudo
   npm:
     name: pm2
     global: yes
@@ -21,6 +24,7 @@
 
 - name: "check for environment variables"
   become_user: ubuntu
+  become_method: sudo
   shell: grep -c "^export TYPEORM_CONNECTION" /etc/environment || true
   register: test_grep
 
