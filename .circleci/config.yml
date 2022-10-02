@@ -249,7 +249,7 @@ jobs:
             - project/.circleci/ansible/inventory.txt
 
       # slack notify
-      - slack_notify_on_faliure
+      # - slack_notify_on_faliure
 
       # Here's where you will add some code to rollback on failure
       # - destroy-environment    
@@ -286,9 +286,9 @@ jobs:
             cd .circleci/ansible
             cat inventory.txt
             ansible-playbook configure-server.yml -i inventory.txt
-            
+
       # slack notify
-      - slack_notify_on_faliure
+      # - slack_notify_on_faliure
 
       # Here's where you will add some code to rollback on failure
       # - destroy-environment
@@ -420,6 +420,7 @@ jobs:
           command: |
             cd ~/project/.circleci/ansible
             ansible-playbook deploy-backend.yml --inventory-file=inventory.txt
+
       - slack-notification-fail
       # Here's where you will add some code to rollback on failure  
       - destroy-environment

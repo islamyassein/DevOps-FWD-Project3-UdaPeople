@@ -4,6 +4,7 @@
   become_method: sudo
   apt:
     upgrade: "yes"
+    update_cache: "yes"
 
 - name: "Add Node.js from Nodesource"
   become: true
