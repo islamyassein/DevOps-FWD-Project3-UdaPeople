@@ -1,21 +1,21 @@
 ---
 - name: "upgrade packages."
-  become_method: sudo
   become: true
+  become_method: sudo
   apt:
     upgrade: "yes"
 
 - name: "install dependencies."
-  become_method: sudo
   become: true
+  become_method: sudo
   apt:
     name: ["nodejs", "npm"]
     state: latest
     update_cache: yes
 
 - name: "install pm2"
-  become_method: sudo
   become: true
+  become_method: sudo
   npm:
     name: pm2
     global: yes
