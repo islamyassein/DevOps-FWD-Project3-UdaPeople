@@ -32,7 +32,7 @@ commands:
     parameters:
       workflowID:
         type: string
-        default: myStack-${CIRCLE_WORKFLOW_ID:0:7}s
+        default: ${CIRCLE_WORKFLOW_ID:0:7}
       # Add parameter here     
     steps:
       - restore_cache:
@@ -43,12 +43,11 @@ commands:
           when: on_fail
           command: |
             # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
-            SUCCESS=`curl -H "token: e38aee29-a976-4696-843d-2d115c52219a" --request GET https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID:0:7}`
-            if [[ $SUCCESS == 1 ]];
+            SUCCESS=$(curl --insecure https://kvdb.io/${KVDB_BUCKET}/migration_<<parameters.workflowID>>)
+            if (($SUCCESS == 1));
             then
               cd ~/project/backend
               npm install
-              # revert migration
               npm run migrations:revert
             fi
 
@@ -318,10 +317,10 @@ jobs:
           command: |
             if grep -q "has been executed successfully." ~/project/backend/migration.log
             then
-              curl https://kvdb.io/QCsiXb2Sg1Z2sCjnUUzFvT/migration_${CIRCLE_WORKFLOW_ID:0:7} -d '1'
+              curl https://kvdb.io/${KVDB_BUCKET}/migration_${CIRCLE_WORKFLOW_ID:0:7} -d '1'
             fi
      # Here's where you will add some code to rollback on failure
-      # - revert-migrations
+      - revert-migrations
       # - destroy-environment    
 
   deploy-frontend:
