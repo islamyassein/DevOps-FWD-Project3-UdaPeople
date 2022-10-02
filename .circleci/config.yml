@@ -77,11 +77,11 @@ commands:
     description: "install nodejs 13 from NodeSource"
     steps:
       - run:
-        name: "install nodejs 13 from NodeSource"
-        command: |
-              apt -y install jq tar gzip git curl
-              curl -fsSL https://deb.nodesource.com/setup_13.x | sudo -E bash -
-              sudo apt-get install -y nodejs
+          name: "install nodejs 13 from NodeSource"
+          command: |
+            apt -y install jq tar gzip git curl
+            curl -fsSL https://deb.nodesource.com/setup_13.x | sudo -E bash -
+            sudo apt-get install -y nodejs
 
   slack_notify_on_faliure:
     steps:
@@ -365,7 +365,7 @@ jobs:
             aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
 
       - destroy-environment
-      
+
       - revert-migrations
           
   deploy-backend:
