@@ -96,7 +96,9 @@ jobs:
       - run:
           name: Build front-end
           command: |
-            cd frontend && npm install && npm run build
+            cd frontend
+            npm install
+            npm run build
 
       - save_cache:
           paths: [frontend/node_modules]
@@ -118,7 +120,9 @@ jobs:
       - run:
           name: Back-End build
           command: |
-            cd backend && npm install && npm run build
+            cd backend
+            npm install
+            npm run build
 
       - save_cache:
           paths: [backend/node_modules]
@@ -490,7 +494,7 @@ workflows:
     jobs:
       - build-frontend
       - build-backend
-      - notify_on_success
+      # - notify_on_success
       - test-frontend:
           requires: [build-frontend]
       - test-backend:
