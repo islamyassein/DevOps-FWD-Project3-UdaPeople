@@ -248,8 +248,11 @@ jobs:
           paths:
             - project/.circleci/ansible/inventory.txt
 
+      # slack notify
+      - slack_notify_on_faliure
+
       # Here's where you will add some code to rollback on failure
-      - destroy-environment    
+      # - destroy-environment    
 
   configure-infrastructure:
     docker: 
@@ -272,7 +275,7 @@ jobs:
       - add_ssh_keys:
           fingerprints:
             - "ff:2a:36:47:88:df:cc:df:f2:16:5c:81:f8:b0:83:f6"
-            
+
       # attach workspace
       - attach_workspace:
           at: ~/
@@ -283,9 +286,12 @@ jobs:
             cd .circleci/ansible
             cat inventory.txt
             ansible-playbook configure-server.yml -i inventory.txt
+            
+      # slack notify
+      - slack_notify_on_faliure
 
       # Here's where you will add some code to rollback on failure
-      - destroy-environment
+      # - destroy-environment
 
 
   run-migrations:
@@ -320,8 +326,8 @@ jobs:
                --request PUT --data "1" https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID:0:7}
             fi
      # Here's where you will add some code to rollback on failure
-      - revert-migrations
-      - destroy-environment    
+      # - revert-migrations
+      # - destroy-environment    
 
   deploy-frontend:
     docker:
@@ -415,10 +421,11 @@ jobs:
             cd ~/project/.circleci/ansible
             ansible-playbook deploy-backend.yml --inventory-file=inventory.txt
       - slack-notification-fail
+      # Here's where you will add some code to rollback on failure  
       - destroy-environment
       # - revert-migrations
 
-      # Here's where you will add some code to rollback on failure  
+
 
   smoke-test:
     docker:
@@ -513,8 +520,8 @@ workflows:
               only: [main]
       - configure-infrastructure:
           requires: [deploy-infrastructure]
-      - run-migrations:
-          requires: [configure-infrastructure]
+      # - run-migrations:
+      #     requires: [configure-infrastructure]
       # - deploy-frontend:
       #     requires: [run-migrations]
       # - deploy-backend:
