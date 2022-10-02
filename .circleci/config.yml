@@ -1,5 +1,8 @@
 version: 2.1
 
+orbs:
+  slack: circleci/slack@4.1.1
+
 commands:
 
   destroy-environment:
@@ -70,6 +73,12 @@ commands:
             sudo add-apt-repository --yes --update ppa:ansible/ansible
             sudo apt install ansible -y
 
+  slack_notify_on_faliure:
+    steps:
+      - slack/notify:
+          event: fail
+          channel: cicd-pipeline
+          template: basic_fail_1
 
 jobs:
 
@@ -93,6 +102,8 @@ jobs:
           paths: [frontend/node_modules]
           key: frontend-build
 
+      - slack_notify_on_faliure
+
   build-backend:
     docker:
       - image: cimg/node:13.8.0
@@ -113,6 +124,8 @@ jobs:
           paths: [backend/node_modules]
           key: backend-build
 
+      - slack_notify_on_faliure
+
   test-frontend:
     docker:
       - image: cimg/node:13.8.0
@@ -127,6 +140,8 @@ jobs:
             cd frontend
             npm install
             npm run test
+
+      - slack_notify_on_faliure
                 
   test-backend:
     docker:
@@ -141,6 +156,8 @@ jobs:
             cd backend
             npm install
             npm run test
+
+      - slack_notify_on_faliure
           
   scan-frontend:
     docker:
@@ -161,9 +178,10 @@ jobs:
           command: |
             cd frontend
             npm install
-            npm audit fix --audit-level=critical
-#           npm audit fix --audit-level=critical --force
-#           npm audit --audit-level=critical
+            npm audit fix --audit-level=critical --force
+            npm audit --audit-level=critical
+
+      - slack_notify_on_faliure
 
   scan-backend:
     docker:
@@ -178,9 +196,11 @@ jobs:
           command: |
             cd backend
             npm install
-            npm audit fix --audit-level=critical
-#           npm audit fix --audit-level=critical --force
-#           npm audit --audit-level=critical
+            npm audit fix --audit-level=critical --force
+            npm audit fix --audit-level=critical --force
+            npm audit --audit-level=critical
+      
+      - slack_notify_on_faliure
 
 
 
@@ -453,7 +473,15 @@ jobs:
   #           then
   #             # your code here
   #           fi
-            
+  
+  notify_on_success:
+    docker:
+      - image: cimg/base
+    steps:
+      - slack/notify:
+          event: pass
+          channel: cicd-pipeline
+          template: success_tagged_deployment_1
 
 workflows:
   default:
@@ -487,3 +515,6 @@ workflows:
       #     requires: [smoke-test]
       # - cleanup:
       #     requires: [cloudfront-update]
+      - notify_on_success:
+          requires: 
+            - ""
