@@ -401,8 +401,8 @@ jobs:
           command: |
             cd backend
             npm run build
+            tar -czf artifact.tar.gz dist/* package*
             cd ..
-            tar -czvf artifact.tar.gz dist/* package*
             cp backend/artifact.tar.gz .circleci/ansible/roles/deploy/files
       - run:
           name: deploy backend
