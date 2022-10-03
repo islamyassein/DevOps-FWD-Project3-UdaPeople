@@ -21,7 +21,8 @@
     cd ~/backend-app/dist
     pm2 stop default
     pm2 start main.js
-  # pm2 start main.js --update-env
+  #OR pm2 start main.js --update-env
+  #OR pm2 start npm -- start
 
   register: execute_node
 
