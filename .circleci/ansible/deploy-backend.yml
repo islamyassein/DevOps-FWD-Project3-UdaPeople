@@ -5,7 +5,7 @@
   remote_user: ubuntu
   become: true
   become_method: sudo
-  become_user: ubuntu
+  become_user: root
   gather_facts: false
   vars:
     - ansible_python_interpreter: /usr/bin/python3
@@ -15,17 +15,27 @@
   # Get the environment variables from CircleCI and add to the EC2 instance
   environment:
 
-      NODE_ENV: development
-      VERSION: "1"
-      TYPEORM_CONNECTION: "{{ lookup('env', 'TYPEORM_CONNECTION')}}"
-      TYPEORM_MIGRATIONS_DIR: "{{ lookup('env', 'TYPEORM_MIGRATIONS_DIR')}}"
-      TYPEORM_ENTITIES: "{{ lookup('env', 'TYPEORM_ENTITIES')}}"
-      TYPEORM_MIGRATIONS: "{{ lookup('env', 'TYPEORM_MIGRATIONS')}}"
-      TYPEORM_HOST: "{{ lookup('env', 'TYPEORM_HOST')}}"
-      TYPEORM_PORT: "{{ lookup('env', 'TYPEORM_PORT')}}"
-      TYPEORM_USERNAME: "{{ lookup('env', 'TYPEORM_USERNAME')}}"
-      TYPEORM_PASSWORD: "{{ lookup('env', 'TYPEORM_PASSWORD')}}"
-      TYPEORM_DATABASE: "{{ lookup('env', 'TYPEORM_DATABASE')}}"
+    NODE_ENV: production
+    VERSION: "1"
+    TYPEORM_CONNECTION: "postgres"
+    TYPEORM_MIGRATIONS_DIR: "./migrations"
+    TYPEORM_ENTITIES: "./modules/domain/**/*.entity{.ts,.js}"
+    TYPEORM_MIGRATIONS: "./migrations/*.ts"
+    TYPEORM_HOST: "udapeople-prod.cjckrotun9g5.us-east-1.rds.amazonaws.com"
+    TYPEORM_PORT: "5432"
+    TYPEORM_USERNAME: "postgres"
+    TYPEORM_PASSWORD: "udapeopledbpassw0rd"
+    TYPEORM_DATABASE: "postgres"
+
+    # TYPEORM_CONNECTION: "{{ lookup('env', 'TYPEORM_CONNECTION') }}"
+    # TYPEORM_MIGRATIONS_DIR: "{{ lookup('env', 'TYPEORM_MIGRATIONS_DIR') }}"
+    # TYPEORM_ENTITIES: "{{ lookup('env', 'TYPEORM_ENTITIES') }}"
+    # TYPEORM_MIGRATIONS: "{{ lookup('env', 'TYPEORM_MIGRATIONS') }}"
+    # TYPEORM_HOST: "{{ lookup('env', 'TYPEORM_HOST') }}"
+    # TYPEORM_PORT: "{{ lookup('env', 'TYPEORM_PORT') }}"
+    # TYPEORM_USERNAME: "{{ lookup('env', 'TYPEORM_USERNAME') }}"
+    # TYPEORM_PASSWORD: "{{ lookup('env', 'TYPEORM_PASSWORD') }}"
+    # TYPEORM_DATABASE: "{{ lookup('env', 'TYPEORM_DATABASE') }}"
 
   pre_tasks:
     - name: "wait 600 seconds for target connection to become reachable/usable."
@@ -38,20 +48,6 @@
       changed_when: false
 
     - setup:
-  tasks:
-    - name: set env variables
-      shell: |
-        export NODE_ENV=$NODE_ENV
-        export VERSION=$VERSION
-        export TYPEORM_CONNECTION=$TYPEORM_CONNECTION
-        export TYPEORM_MIGRATIONS_DIR=$TYPEORM_MIGRATIONS_DIR
-        export TYPEORM_ENTITIES=$TYPEORM_ENTITIES
-        export TYPEORM_MIGRATIONS=$TYPEORM_MIGRATIONS
-        export TYPEORM_HOST=$TYPEORM_HOST
-        export TYPEORM_PORT=$TYPEORM_PORT
-        export TYPEORM_USERNAME=$TYPEORM_USERNAME
-        export TYPEORM_PASSWORD=$TYPEORM_PASSWORD
-        export TYPEORM_DATABASE=$TYPEORM_DATABASE
     
   roles:
     - deploy

@@ -421,7 +421,6 @@ jobs:
   #     # - revert-migrations
   #     # - destroy-environment
 
-
   deploy-backend:
     docker:
       - image: cimg/base:stable
@@ -461,7 +460,6 @@ jobs:
             
       - destroy-environment
       - revert-migrations
-
 
   smoke-test:
     docker:
