@@ -18,7 +18,6 @@
     cd ~/backend-app/dist
     pm2 stop default
     pm2 start main.js
-  # pm2 start main.js --update-env
   register: execute_node
 
 - name: print message
