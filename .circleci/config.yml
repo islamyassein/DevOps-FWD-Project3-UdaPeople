@@ -489,7 +489,10 @@ jobs:
                 list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
                 --no-paginate --output text | tr -d '\n')
 
-              echo "old workflow ID: $Old_Workflow_ID"
+              echo "Old_Workflow_ID: ${Old_Workflow_ID}"
+              echo CIRCLE_WORKFLOW_ID "${CIRCLE_WORKFLOW_ID:0:7}"
+
+              echo "saving Old_Workflow_ID to kvdb"
               curl https://kvdb.io/${KVDB_BUCKET}/old_workflow_id -d "${Old_Workflow_ID}"
       - run:
           name: Update cloudfront distribution
@@ -518,17 +521,15 @@ jobs:
       - run:
           name: Get old stack workflow id
           command: |
+            # Ftech stacks
             export STACKS=($(aws cloudformation list-stacks --query "StackSummaries[*].StackName" \
               --stack-status-filter CREATE_COMPLETE --no-paginate --output text))
             echo Stack names: "${STACKS[@]}" 
 
             # Fetch the Old workflow ID
-            export OldWorkflowID=$(aws cloudformation \
-              list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
-              --no-paginate --output text)
-            echo OldWorkflowID: "${OldWorkflowID}"
-            echo CIRCLE_WORKFLOW_ID "${CIRCLE_WORKFLOW_ID:0:7}"
-
+            export OldWorkflowID=$(curl --insecure https://kvdb.io/${KVDB_BUCKET}/old_workflow_id)
+            echo "getting Old_Workflow_ID from kvdb, Old_Workflow_ID is:${OldWorkflowIDs}"
+            
             # Remove old stacks and files
             if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
             then
