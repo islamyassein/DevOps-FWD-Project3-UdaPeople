@@ -1,42 +1,35 @@
-- name: "Create udapeople directory"
-  become_user: ubuntu
-  shell: mkdir -p ~/udapeople/
+- name: "Create backend app directory"
+  # become_user: ubuntu
+  # shell: mkdir -p ~/udapeople/
+  file:
+    path: ~/backend-app
+    state: directory
 
-- name: "Stop previous execution"
-  become_user: ubuntu
+- name: "unarchive backend compresses file"
+  unarchive:
+    src: artifact.tar.gz
+    dest: ~/backend-app
+
+
+- name: "installing Nodejs dependencies"
   shell: |
-    cd ~/udapeople/    
-    if pm2 monitor main.js | grep "online"; then
-      pm2 stop main.js
-    fi
+    cd ~/backend-app
+    npm install
 
-- name: "Remove previous deployment"
+- name: "Execute Nodejs backend app with PM2"
+  shell: |
+    cd ~/backend-app/dist
+    pm2 stop default
+    pm2 start main.js
+  # pm2 start main.js --update-env
+
+  register: execute_node
+
+- name: "print Nodejs backend app execution message"
+  debug: 
+    msg: "{{execute_node.stdout_lines}}"
+
+- name: "Run Nodejs backend app as a service"
   become: true
-  file: 
-    path: ~/udapeople/ 
-    state: absent
-
-# - name: "deploy backend app"
-#   become_user: ubuntu
-#   unarchive:
-#     src: ../../backend/app.tar.gz
-#     dest: ~/udapeople/
-#     owner: ubuntu
-#     group: ubuntu
-#     mode: 0755
-
-- name: "deploy backend app"
-  become_user: ubuntu
-  copy:
-    src: ../../backend/
-    dest: ~/udapeople/
-    owner: ubuntu
-    group: ubuntu
-    mode: 0755
-
-- name: "Run backend app"
-  become_user: ubuntu
   shell: |
-    cd ~/udapeople/
-    npm i    
-    pm2 start main.js --update-env
+    env PATH=$PATH:/usr/local/bin pm2 startup systemctl -u ubuntu -hp /home/ubuntu

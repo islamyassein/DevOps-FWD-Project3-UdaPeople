@@ -330,7 +330,7 @@ jobs:
             fi
      # Here's where you will add some code to rollback on failure
       - revert-migrations
-      # - destroy-environment    
+      - destroy-environment    
 
   deploy-frontend:
     docker:
@@ -361,59 +361,65 @@ jobs:
           name: Deploy frontend objects
           command: |
             cd frontend
+            npm install
             npm run build
+            tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
             aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
 
-      - destroy-environment
+      # - destroy-environment
+      # - revert-migrations
 
-      - revert-migrations
-          
   deploy-backend:
     docker:
-      # Docker image here that supports Ansible
-       - image: python:3.7-alpine3.11
+      - image: cimg/base:stable
+
     steps:
       - checkout
-
+      - install_awscli
+      - install_nodejs
+      # Add ssh keys with fingerprint
       - add_ssh_keys:
           fingerprints:
             - "ff:2a:36:47:88:df:cc:df:f2:16:5c:81:f8:b0:83:f6"
-
-      - run:
-          name: Install dependencies
-          command: |
-            apt -y update
-            apt -y install jq tar gzip git curl
-            curl -sL https://deb.nodesource.com/setup_12.x | bash -
-            apt -y install nodejs
-
+      
+      - restore_cache:
+          keys: [backend-build]
       - attach_workspace:
           at: ~/
 
       - run:
-          name: Avoid hosts unknown
+          name: avoid hosts unknown ssh error
           command: |
             echo -e "Host *\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
       - run:
-          name: Build backend
+          name: install npm backend dependencies
           command: |
             cd backend
-            npm i
-            #export NODE_ENV=production
-            npm run build
-            cp package* ./dist
-            cd dist
-            tar -czvf ../backend.tar.gz ./*
+            npm install
       - run:
-          name: Deploy backend
+          name: package backend
           command: |
+            cd backend
+            npm run build
+            tar -czf artifact.tar.gz dist/* package*
+
+            cd ..
+            cd dist
+            cp artifact.tar.gz .circleci/ansible/roles/deploy/files
+      - run:
+          name: deploy backend
+          command: |
+            export TYPEORM_MIGRATIONS_DIR=./migrations
+            export TYPEORM_ENTITIES=./modules/domain/**/*.entity{.ts,.js}
+            export TYPEORM_MIGRATIONS=./src/migrations/*{.ts,.js}
+
             cd ~/project/.circleci/ansible
+            cat inventory.txt
             ansible-playbook deploy-backend.yml --inventory-file=inventory.txt
 
-      - slack-notification-fail
-      # Here's where you will add some code to rollback on failure  
-      - destroy-environment
+      # - slack_notify_on_faliure
       # - revert-migrations
+      # - destroy-environment
 
   smoke-test:
     docker:
@@ -510,10 +516,10 @@ workflows:
           requires: [deploy-infrastructure]
       - run-migrations:
           requires: [configure-infrastructure]
-      # - deploy-frontend:
-      #     requires: [run-migrations]
-      # - deploy-backend:
-      #     requires: [run-migrations]
+      - deploy-frontend:
+          requires: [run-migrations]
+      - deploy-backend:
+          requires: [run-migrations]
       # - smoke-test:
       #     requires: [deploy-backend, deploy-frontend]
       # - cloudfront-update:
