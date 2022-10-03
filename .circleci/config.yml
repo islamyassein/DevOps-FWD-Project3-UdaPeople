@@ -243,11 +243,12 @@ jobs:
       - run:
           name: Add back-end ip to ansible inventory
           command: |
-            aws ec2 describe-instances \
-              --query "Reservations[*].Instances[*].PublicIpAddress" \
+            BACKEND_PUBLIC_IP=$(aws ec2 describe-instances \
               --filters "Name=tag:project,Values=udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
-              --output text >> .circleci/ansible/inventory.txt
-      - run: cat .circleci/ansible/inventory.txt
+              --query 'Reservations[*].Instances[*].PublicIpAddress' \
+              --output text)
+            echo $BACKEND_PUBLIC_IP >> .circleci/ansible/inventory.txt
+            cat .circleci/ansible/inventory.txt
       - persist_to_workspace:
           root: ~/
           paths:
@@ -365,12 +366,10 @@ jobs:
       - add_ssh_keys:
           fingerprints:
             - "ff:2a:36:47:88:df:cc:df:f2:16:5c:81:f8:b0:83:f6"
-      
-      - restore_cache:
-          keys: [backend-build]
       - attach_workspace:
           at: ~/
-
+      - restore_cache:
+          keys: [backend-build]
       - run:
           name: avoid hosts unknown ssh error
           command: |
@@ -397,9 +396,16 @@ jobs:
             export TYPEORM_ENTITIES=./modules/domain/**/*.entity{.ts,.js}
             export TYPEORM_MIGRATIONS=./migrations/*.ts
 
-            cd ~/project/.circleci/ansible
+            
+            aws ec2 describe-instances \
+              --query "Reservations[*].Instances[*].PublicIpAddress" \
+              --filters "Name=tag:project,Values=udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --output text >> .circleci/ansible/inventory.txt
+
+            cd .circleci/ansible
             cat inventory.txt
-            ansible-playbook deploy-backend.yml --inventory-file=inventory.txt
+            ansible-playbook -i inventory.txt deploy-backend.yml
+
       # - slack_notify_on_faliure
       # - revert-migrations
       # - destroy-environment
