@@ -369,58 +369,99 @@ jobs:
       # - destroy-environment
       # - revert-migrations
 
+  # deploy-backend:
+  #   docker:
+  #     - image: cimg/base:stable
+
+  #   steps:
+  #     - checkout
+  #     - install_awscli
+  #     - install_nodejs
+  #     - install_ansible
+  #     # Add ssh keys with fingerprint
+  #     - add_ssh_keys:
+  #         fingerprints:
+  #           - "ff:2a:36:47:88:df:cc:df:f2:16:5c:81:f8:b0:83:f6"
+      
+  #     - restore_cache:
+  #         keys: [backend-build]
+  #     - attach_workspace:
+  #         at: ~/
+
+  #     - run:
+  #         name: avoid hosts unknown ssh error
+  #         command: |
+  #           echo -e "Host *\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
+  #     - run:
+  #         name: install npm backend dependencies
+  #         command: |
+  #           cd backend
+  #           npm install
+  #     - run:
+  #         name: package backend
+  #         command: |
+  #           cd backend
+  #           npm install
+  #           npm run build
+  #           cd ..
+  #           tar -C backend -czvf artifact.tar.gz .
+  #           cp artifact.tar.gz ~/project/.circleci/ansible/roles/deploy/files
+  #       #   tar -czf artifact.tar.gz dist/* package*
+  #     - run:
+  #         name: deploy backend
+  #         command: |
+  #           export TYPEORM_MIGRATIONS_DIR=./migrations
+  #           export TYPEORM_ENTITIES=./modules/domain/**/*.entity{.ts,.js}
+  #           export TYPEORM_MIGRATIONS=./src/migrations/*{.ts,.js}
+
+  #           cd ~/project/.circleci/ansible
+  #           cat inventory.txt
+  #           ansible-playbook deploy-backend.yml --inventory-file=inventory.txt
+  #     # - slack_notify_on_faliure
+  #     # - revert-migrations
+  #     # - destroy-environment
+
+
   deploy-backend:
     docker:
       - image: cimg/base:stable
-
     steps:
       - checkout
       - install_awscli
-      - install_nodejs
       - install_ansible
-      # Add ssh keys with fingerprint
+      - install_nodejs
       - add_ssh_keys:
-          fingerprints:
-            - "ff:2a:36:47:88:df:cc:df:f2:16:5c:81:f8:b0:83:f6"
-      
-      - restore_cache:
-          keys: [backend-build]
+          fingerprints: ["ff:2a:36:47:88:df:cc:df:f2:16:5c:81:f8:b0:83:f6"]
       - attach_workspace:
           at: ~/
-
+      - restore_cache:
+          keys: [backend-build]
       - run:
-          name: avoid hosts unknown ssh error
-          command: |
-            echo -e "Host *\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
-      - run:
-          name: install npm backend dependencies
+          name: Install dependencies
           command: |
             cd backend
             npm install
       - run:
-          name: package backend
+          name: Package Backend
           command: |
             cd backend
-            npm install
             npm run build
+            tar -czf artifact.tar.gz dist/* package*
             cd ..
-            tar -C backend -czvf artifact.tar.gz .
-            cp artifact.tar.gz ~/project/.circleci/ansible/roles/deploy/files
-        #   tar -czf artifact.tar.gz dist/* package*
+            cp backend/artifact.tar.gz .circleci/ansible/roles/deploy/files
       - run:
-          name: deploy backend
+          name: Deploy backend
           command: |
             export TYPEORM_MIGRATIONS_DIR=./migrations
             export TYPEORM_ENTITIES=./modules/domain/**/*.entity{.ts,.js}
-            export TYPEORM_MIGRATIONS=./src/migrations/*{.ts,.js}
-
-            cd ~/project/.circleci/ansible
+            export TYPEORM_MIGRATIONS=./migrations/*.ts
+            cd .circleci/ansible
             cat inventory.txt
-            ansible-playbook deploy-backend.yml --inventory-file=inventory.txt
+            ansible-playbook -i inventory.txt deploy-backend.yml
+            
+      - destroy-environment
+      - revert-migrations
 
-      # - slack_notify_on_faliure
-      # - revert-migrations
-      # - destroy-environment
 
   smoke-test:
     docker:
