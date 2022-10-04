@@ -1,26 +1,83 @@
 ---
+- name: "update apt packages."
+  become: true
+  apt:
+    update_cache: yes
+
+- name: "upgrade packages"
+  become: true
+  apt:
+    upgrade: yes
+
+- name: "install dependencies."
+  become: true
+  apt:
+    name: ["nodejs", "npm"]
+    state: latest
+    update_cache: yes
+
+- name: "install pm2"
+  become: true
+  npm:
+    name: pm2
+    global: yes
+    production: yes
+    state: present
+
+# - name: "set environment variables"
+#   shell: |
+#     export TYPEORM_HOST=udapeople-prod.cjckrotun9g5.us-east-1.rds.amazonaws.com
+#     export TYPEORM_PORT=5432
+#     export TYPEORM_USERNAME=postgres
+#     export TYPEORM_PASSWORD=udapeopledbpassw0rd
+#     export TYPEORM_DATABASE=glee
+#     export TYPEORM_MIGRATIONS_DIR=./backend-app/dist/migrations
+#     export TYPEORM_ENTITIES=./backend-app/dist/modules/domain/*/.entity{.ts,.js}
+#     export TYPEORM_MIGRATIONS=./backend-app/dist/migrations/*.ts
+
 - name: "Creates backend app directory"
   file:
-    path: ~/backend-app
+    path: /home/ubuntu/backend-app
     state: directory
 
 - name: "Unarchive backend files"
   unarchive:
     src: artifact.tar.gz
-    dest: ~/backend-app
+    dest: /home/ubuntu/backend-app
+
 
 - name: "Installing Node Dependencies"
+  become: true
   shell: |
-    cd ~/backend-app
-    npm i
-- name: "Executing Node app with PM2"
+    cd /home/ubuntu/backend-app
+    npm install
+  register: build_node
+
+- name: print build_node message
+  debug:
+    msg: "{{ execute_node.stdout_lines }}"
+
+- name: "Executing Node app with PM2, the 1st method, Udacity instructions"
   shell: |
-    cd ~/backend-app/dist
+    cd /home/ubuntu/backend-app
     pm2 stop default
-    pm2 start main.js
+    pm2 start npm -- start
   register: execute_node
 
-- name: print message
+# - name: "Executing Node app with PM2, the 2nd method, Mahmoud Alahmady Videos"
+#   shell: |
+#     cd /home/ubuntu/backend-app/dist
+#     pm2 stop default
+#     pm2 start main.js
+#   register: execute_node
+
+# - name: "Executing Node app with PM2, the 3rd method, Stackoverflow Article"
+#   shell: |
+#     cd /home/ubuntu/backend-app
+#     pm2 start npm --name backend-app -- start
+#   register: execute_node
+
+- name: print execute_node message
   debug:
     msg: "{{ execute_node.stdout_lines }}"
 

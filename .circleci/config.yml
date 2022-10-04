@@ -329,11 +329,7 @@ jobs:
       - install_nodejs
       - restore_cache:
           keys: [frontend-build]
-      - run:
-          name: Install dependencies
-          command: |
-            cd frontend
-            npm install
+
       - run:
           name: Get backend url
           command: |
@@ -347,7 +343,9 @@ jobs:
           name: Deploy frontend objects
           command: |
             cd frontend
+            npm install
             npm run build
+            tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
             aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
       # - slack_notify_on_faliure  
       # - revert-migrations 
@@ -374,27 +372,50 @@ jobs:
           name: avoid hosts unknown ssh error
           command: |
             echo -e "Host *\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
+
+      # - run:
+      #     name: Configure Env File
+      #     command: |
+      #       echo NODE_ENV=production >> backend/.env
+      #       echo VERSION=1 >> backend/.env
+      #       echo TYPEORM_CONNECTION=postgres >> backend/.env
+      #       echo TYPEORM_MIGRATIONS_DIR=./src/migrations >> backend/.env
+      #       echo TYPEORM_ENTITIES=./src/modules/domain/**/*.entity.ts >> backend/.env
+      #       echo TYPEORM_MIGRATIONS=./src/migrations/*.ts >> backend/.env
+      #       echo TYPEORM_HOST=$TYPEORM_HOST >> "backend/.env"
+      #       echo TYPEORM_PORT=$TYPEORM_PORT >> "backend/.env"
+      #       echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> "backend/.env"
+      #       echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> "backend/.env"
+      #       echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> "backend/.env"
+      #       cat backend/.env
+
       - run:
-          name: install npm backend dependencies
+          name: install npm backend dependencies, and package backend
           command: |
             cd backend
             npm install
-      - run:
-          name: package backend
-          command: |
-            cd backend
             npm run build
-            tar -czf artifact.tar.gz dist/* package*
             cd ..
-            cp backend/artifact.tar.gz ~/project/.circleci/ansible/roles/deploy/files
-            # tar -C backend -czvf artifact.tar.gz .
+            # Zip the directory
+            tar -C backend -czvf artifact.tar.gz .
+            cd .circleci/ansible
+            echo "Contents  of the inventory.txt file is -------"
+            cat inventory.txt
+            ansible-playbook -i inventory.txt deploy-backend.yml
+          # old script to package backend
+          # cd backend
+          # npm run build
+          # tar -czf artifact.tar.gz dist/* package*
+          # cd ..
+          # cp backend/artifact.tar.gz ~/project/.circleci/ansible/roles/deploy/files
+          # # tar -C backend -czvf artifact.tar.gz .
 
       - run:
           name: deploy backend
           command: |
-            export TYPEORM_MIGRATIONS_DIR=./migrations
-            export TYPEORM_ENTITIES=./modules/domain/**/*.entity{.ts,.js}
-            export TYPEORM_MIGRATIONS=./migrations/*.ts
+            export TYPEORM_MIGRATIONS_DIR="./backend-app/dist/migrations"
+            export TYPEORM_ENTITIES="./backend-app/dist/modules/domain/*/.entity{.ts,.js}"
+            export TYPEORM_MIGRATIONS="./backend-app/dist/migrations/*.ts"
 
             cd .circleci/ansible
             cat inventory.txt
