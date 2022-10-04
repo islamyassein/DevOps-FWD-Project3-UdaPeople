@@ -9,22 +9,6 @@
   apt:
     upgrade: yes
 
-- name: "install dependencies."
-  become: true
-  apt:
-    name: ["nodejs", "npm"]
-    state: latest
-    update_cache: yes
-    force_apt_get: True
-
-- name: "install pm2"
-  become: true
-  npm:
-    name: pm2
-    global: yes
-    production: yes
-    state: present
-
 # - name: "set environment variables"
 #   shell: |
 #     export TYPEORM_HOST=udapeople-prod.cjckrotun9g5.us-east-1.rds.amazonaws.com
