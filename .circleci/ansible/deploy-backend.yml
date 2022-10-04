@@ -35,9 +35,6 @@
       changed_when: false
     
     - setup:
-  
-  taks:
-    - 
 
   roles:
     - deploy
