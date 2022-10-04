@@ -405,6 +405,15 @@ jobs:
       - run:
           name: install npm backend dependencies, and package backend
           command: |
+
+            # cd backend
+            # npm install
+            # npm run build
+            # tar -czf artifact.tar.gz dist/* package*
+            # cd ..
+            # cp backend/artifact.tar.gz ~/project/.circleci/ansible/roles/deploy/files
+
+            # the way of udacity instructions
             cd backend
             npm install
             npm run build
@@ -412,18 +421,13 @@ jobs:
             # Zip the directory
             tar -C backend -czvf artifact.tar.gz .
             cp artifact.tar.gz ~/project/.circleci/ansible/roles/deploy/files
-            cd .circleci/ansible
-
-            # Old script to package backend
-            # cd backend
-            # npm run build
-            # tar -czf artifact.tar.gz dist/* package*
-            # cd ..
-            # cp backend/artifact.tar.gz ~/project/.circleci/ansible/roles/deploy/files
-
       - run:
           name: deploy backend using ansible
           command: |
+            export TYPEORM_MIGRATIONS_DIR=./migrations
+            export TYPEORM_ENTITIES=./modules/domain/**/*.entity{.ts,.js}
+            export TYPEORM_MIGRATIONS=./migrations/*.ts
+
             cd .circleci/ansible
             echo "Contents  of the inventory.txt file is -------"
             cat inventory.txt
