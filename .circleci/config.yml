@@ -377,7 +377,7 @@ jobs:
             echo -e "Host *\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
 
       # - run:
-      #     name: Configure .Env File
+      #     name: Configure .Env File to be copied to server using ansible
       #     command: |
       #       echo NODE_ENV=production >> backend/.env
       #       echo VERSION=1 >> backend/.env
@@ -395,8 +395,12 @@ jobs:
       - run:
           name: install npm backend dependencies, and package backend
           command: |
+            # set environment variables for building backend package
+            export TYPEORM_ENTITIES=./src/modules/domain/**/*.entity{.ts,.js}
+            export TYPEORM_MIGRATIONS=./src/migrations/*.ts
+            export TYPEORM_MIGRATIONS_DIR=./src/migrations
 
-            the way of Mahmoud Alahmady Videos
+            # the way of Mahmoud Alahmady Videos
             cd backend
             npm install
             npm run build
@@ -416,10 +420,6 @@ jobs:
       - run:
           name: deploy backend using ansible
           command: |
-            export TYPEORM_ENTITIES=./src/modules/domain/**/*.entity{.ts,.js}
-            export TYPEORM_MIGRATIONS=./src/migrations/*.ts
-            export TYPEORM_MIGRATIONS_DIR=./src/migrations
-
             cd .circleci/ansible
             echo "Contents  of the inventory.txt file is -------"
             cat inventory.txt

@@ -1,5 +1,5 @@
 ---
-- name: "set environment variables"
+- name: "set Node.js backend environment variables"
   shell: |
     cd /home/ubuntu/backend-app
     export NODE_ENV=production
