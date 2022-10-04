@@ -35,7 +35,7 @@
 
 - name: print build_node message
   debug:
-    msg: "{{ execute_node.stdout_lines }}"
+    msg: "{{ build_node.stdout_lines }}"
 
 - name: "Executing Node app with PM2, the 1st method, Udacity instructions"
   shell: |
