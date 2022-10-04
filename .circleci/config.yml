@@ -411,6 +411,7 @@ jobs:
             cd ..
             # Zip the directory
             tar -C backend -czvf artifact.tar.gz .
+            cp artifact.tar.gz ~/project/.circleci/ansible/roles/deploy/files
             cd .circleci/ansible
             echo "Contents  of the inventory.txt file is -------"
             cat inventory.txt
@@ -422,7 +423,6 @@ jobs:
             # tar -czf artifact.tar.gz dist/* package*
             # cd ..
             # cp backend/artifact.tar.gz ~/project/.circleci/ansible/roles/deploy/files
-            # # tar -C backend -czvf artifact.tar.gz .
 
       - run:
           name: deploy backend
@@ -562,7 +562,6 @@ workflows:
     jobs:
       - build-frontend
       - build-backend
-      # - notify_on_success
       - test-frontend:
           requires: [build-frontend]
       - test-backend:
@@ -590,3 +589,4 @@ workflows:
           requires: [smoke-test]
       - cleanup:
           requires: [cloudfront-update]
+      # - notify_on_success

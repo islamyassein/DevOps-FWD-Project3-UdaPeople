@@ -15,9 +15,14 @@
     path: /home/ubuntu/backend-app
     state: directory
 
+# - name: "Unarchive backend files"
+#   unarchive:
+#     src: artifact.tar.gz
+#     dest: /home/ubuntu/backend-app
+
 - name: "Unarchive backend files"
   unarchive:
-    src: artifact.tar.gz
+    src: ~/project/artifact.tar.gz
     dest: /home/ubuntu/backend-app
 
 
