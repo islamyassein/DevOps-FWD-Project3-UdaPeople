@@ -9,22 +9,21 @@
   apt:
     upgrade: yes
 
-- name: "Add Node.js from Nodesource"
+- name: "Add Node.js from Nodesource, and install NPM"
   become: true
   shell: |
-    curl -sL https://deb.nodesource.com/setup_13.x | sudo -E bash -
+    sudo apt-get install -y jq tar gzip git curl
+    curl -fsSL https://deb.nodesource.com/setup_13.x | sudo -E bash -
+    sudo apt-get install -y nodejs
+    sudo apt-get install -y npm
+    sudo apt-get update
 
-# - name: "Install Node.js Latest"
+# - name: "Add Node.js and NPM using ansible apt module"
 #   become: true
 #   apt:
-#     name: ["nodejs"]
+#     name: ["nodejs","npm"]
 #     state: latest
 #     update_cache: yes
-
-- name: "Install NPM"
-  become: true
-  shell:
-    sudo apt install npm
 
 - name: "Install PM2 Globally"
   become: true
