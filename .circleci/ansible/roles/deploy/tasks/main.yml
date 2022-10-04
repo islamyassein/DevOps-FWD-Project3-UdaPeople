@@ -1,14 +1,4 @@
 ---
-- name: "update apt packages."
-  become: true
-  apt:
-    update_cache: yes
-
-- name: "upgrade packages"
-  become: true
-  apt:
-    upgrade: yes
-
 # - name: "set environment variables"
 #   shell: |
 #     export TYPEORM_HOST=udapeople-prod.cjckrotun9g5.us-east-1.rds.amazonaws.com

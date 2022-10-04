@@ -1,15 +1,30 @@
 ---
+- name: "update apt packages."
+  become: true
+  apt:
+    update_cache: yes
+
+- name: "upgrade packages"
+  become: true
+  apt:
+    upgrade: yes
+
 - name: "Add Node.js from Nodesource"
   become: true
   shell: |
     curl -sL https://deb.nodesource.com/setup_13.x | sudo -E bash -
 
-- name: "Install Node.js 13"
+# - name: "Install Node.js Latest"
+#   become: true
+#   apt:
+#     name: ["nodejs"]
+#     state: latest
+#     update_cache: yes
+
+- name: "Install NPM"
   become: true
-  apt:
-    name: ["nodejs","npm"]
-    state: latest
-    update_cache: yes
+  shell:
+    sudo apt install npm
 
 - name: "Install PM2 Globally"
   become: true
