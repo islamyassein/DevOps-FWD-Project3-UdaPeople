@@ -281,7 +281,7 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          name: Configure server
+          name: Configure ec2 backend server using ansible
           command: |
             cd .circleci/ansible
             cat inventory.txt
@@ -354,7 +354,7 @@ jobs:
             echo "API_URL=http://${BACKEND_PUBLIC_IP}:3030" >> frontend/.env
             cat frontend/.env
       - run:
-          name: Deploy frontend objects
+          name: Deploy frontend objects using ansible
           command: |
             cd frontend
             npm install
@@ -413,9 +413,6 @@ jobs:
             tar -C backend -czvf artifact.tar.gz .
             cp artifact.tar.gz ~/project/.circleci/ansible/roles/deploy/files
             cd .circleci/ansible
-            echo "Contents  of the inventory.txt file is -------"
-            cat inventory.txt
-            ansible-playbook -i inventory.txt deploy-backend.yml
 
             # Old script to package backend
             # cd backend
@@ -425,9 +422,10 @@ jobs:
             # cp backend/artifact.tar.gz ~/project/.circleci/ansible/roles/deploy/files
 
       - run:
-          name: deploy backend
+          name: deploy backend using ansible
           command: |
             cd .circleci/ansible
+            echo "Contents  of the inventory.txt file is -------"
             cat inventory.txt
             ansible-playbook -i inventory.txt deploy-backend.yml
 
