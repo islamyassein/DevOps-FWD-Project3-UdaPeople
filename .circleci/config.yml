@@ -361,67 +361,34 @@ jobs:
     steps:
       - checkout
       - install_awscli
-      - install_nodejs
       - install_ansible
-      # Add ssh keys with fingerprint
+      - install_nodejs
       - add_ssh_keys:
-          fingerprints:
-            - "ff:2a:36:47:88:df:cc:df:f2:16:5c:81:f8:b0:83:f6"
+          fingerprints: ["ff:2a:36:47:88:df:cc:df:f2:16:5c:81:f8:b0:83:f6"]
       - attach_workspace:
           at: ~/
       - restore_cache:
           keys: [backend-build]
       - run:
-          name: avoid hosts unknown ssh error
+          name: Install dependencies
           command: |
-            echo -e "Host *\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
-
-      # - run:
-      #     name: Configure .Env File to be copied to server using ansible
-      #     command: |
-      #       echo NODE_ENV=production >> backend/.env
-      #       echo VERSION=1 >> backend/.env
-      #       echo TYPEORM_CONNECTION=postgres >> backend/.env
-      #       echo TYPEORM_ENTITIES=./src/modules/domain/**/*.entity{.ts,.js} >> backend/.env
-      #       echo TYPEORM_HOST=$TYPEORM_HOST >> "backend/.env"
-      #       echo TYPEORM_PORT=$TYPEORM_PORT >> "backend/.env"
-      #       echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> "backend/.env"
-      #       echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> "backend/.env"
-      #       echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> "backend/.env"
-      #       echo TYPEORM_MIGRATIONS=./src/migrations/*.ts >> backend/.env
-      #       echo TYPEORM_MIGRATIONS_DIR=./src/migrations >> backend/.env
-      #       cat backend/.env
-
-      - run:
-          name: install npm backend dependencies, and package backend
-          command: |
-            # set environment variables for building backend package
-            export TYPEORM_ENTITIES=./src/modules/domain/**/*.entity{.ts,.js}
-            export TYPEORM_MIGRATIONS=./src/migrations/*.ts
-            export TYPEORM_MIGRATIONS_DIR=./src/migrations
-
-            # the way of Mahmoud Alahmady Videos
             cd backend
             npm install
+      - run:
+          name: Package Backend
+          command: |
+            cd backend
             npm run build
             tar -czf artifact.tar.gz dist/* package*
             cd ..
-            cp backend/artifact.tar.gz ~/project/.circleci/ansible/roles/deploy/files
-
-            # # the way of udacity instructions
-            # cd backend
-            # npm install
-            # npm run build
-            # cd ..
-            # # Zip the directory
-            # tar -C backend -czvf artifact.tar.gz .
-            # cp artifact.tar.gz ~/project/.circleci/ansible/roles/deploy/files
-
+            cp backend/artifact.tar.gz .circleci/ansible/roles/deploy/files
       - run:
-          name: deploy backend using ansible
+          name: Deploy backend
           command: |
+            export TYPEORM_MIGRATIONS_DIR=./migrations
+            export TYPEORM_ENTITIES=./modules/domain/**/*.entity{.ts,.js}
+            export TYPEORM_MIGRATIONS=./migrations/*.ts
             cd .circleci/ansible
-            echo "Contents  of the inventory.txt file is -------"
             cat inventory.txt
             ansible-playbook -i inventory.txt deploy-backend.yml
 
