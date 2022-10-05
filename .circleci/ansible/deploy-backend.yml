@@ -14,16 +14,16 @@
 
   environment:
     NODE_ENV: production
-    VERSION: "1"
-    TYPEORM_CONNECTION: "{{ lookup('env', 'TYPEORM_CONNECTION') }}"
-    TYPEORM_MIGRATIONS_DIR: "{{ lookup('env', 'TYPEORM_MIGRATIONS_DIR') }}"
-    TYPEORM_ENTITIES: "{{ lookup('env', 'TYPEORM_ENTITIES') }}"
-    TYPEORM_MIGRATIONS: "{{ lookup('env', 'TYPEORM_MIGRATIONS') }}"
-    TYPEORM_HOST: "{{ lookup('env', 'TYPEORM_HOST') }}"
-    TYPEORM_PORT: "{{ lookup('env', 'TYPEORM_PORT') }}"
-    TYPEORM_USERNAME: "{{ lookup('env', 'TYPEORM_USERNAME') }}"
-    TYPEORM_PASSWORD: "{{ lookup('env', 'TYPEORM_PASSWORD') }}"
-    TYPEORM_DATABASE: "{{ lookup('env', 'TYPEORM_DATABASE') }}"
+    VERSION: 1
+    TYPEORM_CONNECTION: postgres # "{{ lookup('env', 'TYPEORM_CONNECTION') }}"
+    TYPEORM_MIGRATIONS_DIR: ./src/migrations # "{{ lookup('env', 'TYPEORM_MIGRATIONS_DIR') }}"
+    TYPEORM_ENTITIES: ./src/modules/domain/**/*.entity{.ts,.js} # "{{ lookup('env', 'TYPEORM_ENTITIES') }}"
+    TYPEORM_MIGRATIONS: ./src/migrations/*.ts  # "{{ lookup('env', 'TYPEORM_MIGRATIONS') }}"
+    TYPEORM_HOST: udapeople-prod.cjckrotun9g5.us-east-1.rds.amazonaws.com # "{{ lookup('env', 'TYPEORM_HOST') }}"
+    TYPEORM_PORT: 5432  # "{{ lookup('env', 'TYPEORM_PORT') }}"
+    TYPEORM_USERNAME: postgres # "{{ lookup('env', 'TYPEORM_USERNAME') }}"
+    TYPEORM_PASSWORD: udapeopledbpassw0rd # "{{ lookup('env', 'TYPEORM_PASSWORD') }}"
+    TYPEORM_DATABASE: postgres # "{{ lookup('env', 'TYPEORM_DATABASE') }}"
     
   pre_tasks:
     - name: "wait 600 seconds for target connection to become reachable/usable."

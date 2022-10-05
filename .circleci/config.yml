@@ -421,9 +421,9 @@ jobs:
 
             if curl -s ${API_URL}/api/status | grep "ok"
             then
-              echo success
+              exit 0
             else
-              echo fail
+              exit 1
             fi
       - run:
           name: Frontend smoke test.
