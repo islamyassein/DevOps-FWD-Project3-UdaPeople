@@ -379,16 +379,13 @@ jobs:
       - run:
           name: Package Backend (npm run build, generate archive file from dist/* + package*)
           command: |
-            export TYPEORM_MIGRATIONS_DIR=./migrations
-            export TYPEORM_ENTITIES=./modules/domain/**/*.entity{.ts,.js}
-            export TYPEORM_MIGRATIONS=./migrations/*.ts
             cd backend
             npm run build
             tar -czf artifact.tar.gz dist/* package*
             cd ..
             cp backend/artifact.tar.gz .circleci/ansible/roles/deploy/files
       - run:
-          name: Deploy backend (add the needed )
+          name: Deploy backend (add the needed)
           command: |
             cd .circleci/ansible
             cat inventory.txt
@@ -424,9 +421,9 @@ jobs:
 
             if curl -s ${API_URL}/api/status | grep "ok"
             then
-              exit 0
+              echo success
             else
-              exit 1
+              echo fail
             fi
       - run:
           name: Frontend smoke test.
