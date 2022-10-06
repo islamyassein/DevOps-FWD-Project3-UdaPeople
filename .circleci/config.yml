@@ -364,10 +364,6 @@ jobs:
   deploy-backend:
     docker:
       - image: cimg/base:stable
-        environment:
-            TYPEORM_MIGRATIONS_DIR: ./migrations
-            TYPEORM_ENTITIES: ./modules/domain/**/*.entity{.ts,.js}
-            TYPEORM_MIGRATIONS: ./migrations/*.ts
     steps:
       - checkout
       - install_awscli
@@ -394,6 +390,10 @@ jobs:
             cp backend/artifact.tar.gz .circleci/ansible/roles/deploy/files
       - run:
           name: Deploy backend
+          environment:
+            TYPEORM_MIGRATIONS_DIR: ./migrations
+            TYPEORM_ENTITIES: ./modules/domain/**/*.entity{.ts,.js}
+            TYPEORM_MIGRATIONS: ./migrations/*.ts
           command: |
             # export TYPEORM_MIGRATIONS_DIR=./migrations
             # export TYPEORM_ENTITIES=./modules/domain/**/*.entity{.ts,.js}
