@@ -17,3 +17,14 @@ http://3.88.84.248:3030/api/status
 5- Public URL to your Prometheus Server [URL05]
 
 http://ec2-52-91-67-236.compute-1.amazonaws.com:9090/targets
+
+
+____________________
+CPU Usage
+avg(rate(node_cpu_seconds_total{mode!="idle"}[1m])) by (instance)*100
+
+Available Memory
+node_memory_Cached_bytes + node_memory_Buffers_bytes + node_memory_MemFree_bytes
+
+available disk space
+node_filesystem_free_bytes{device="/dev/root"}
