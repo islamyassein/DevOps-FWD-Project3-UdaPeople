@@ -301,11 +301,12 @@ jobs:
       - install_awscli
       - run:
           name: Run migrations
+          # migration needs to define the below explicit variables, those env variables may be already added to CircleCi env variables
+          environment:
+            TYPEORM_ENTITIES: ./src/modules/domain/**/*.entity{.ts,.js}
+            TYPEORM_MIGRATIONS: ./src/migrations/*.ts
+            TYPEORM_MIGRATIONS_DIR: ./src/migrations         
           command: |
-            # migration needs to define the below variables
-            export TYPEORM_ENTITIES=./src/modules/domain/**/*.entity{.ts,.js}
-            export TYPEORM_MIGRATIONS=./src/migrations/*.ts
-            export TYPEORM_MIGRATIONS_DIR=./src/migrations
 
             cd backend
             npm install
@@ -386,8 +387,7 @@ jobs:
             cp backend/artifact.tar.gz .circleci/ansible/roles/deploy/files
       - run:
           name: Deploy Backend via Ansible
-          # backend deploy will push the below variables plus the CircleCI variables to EC2 instance via ansible
-          # the below environment variables block works fine with image cimg/base:stable, not working with circleci/node:13.8.0
+          # backend deploy will push the below env variables plus CircleCI env variables to EC2 instance via ansible
           environment:
             TYPEORM_MIGRATIONS_DIR: ./migrations
             TYPEORM_ENTITIES: ./modules/domain/**/*.entity{.ts,.js}
@@ -517,8 +517,7 @@ jobs:
             fi
       
       # - slack_notify_on_failure
-
-      
+     
   notify_on_success:
     docker:
       - image: 'cimg/base:stable'
