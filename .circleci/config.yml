@@ -295,6 +295,10 @@ jobs:
     docker:
       # Docker image here that supports NodeJS
       - image: circleci/node:13.8.0
+        environment:
+            TYPEORM_ENTITIES: ./src/modules/domain/**/*.entity{.ts,.js}
+            TYPEORM_MIGRATIONS: ./src/migrations/*.ts
+            TYPEORM_MIGRATIONS_DIR: ./src/migrations
     
     steps:
       # Checkout code from git
@@ -303,9 +307,9 @@ jobs:
       - run:
           name: Run migrations
           command: |
-            export TYPEORM_ENTITIES=./src/modules/domain/**/*.entity{.ts,.js}
-            export TYPEORM_MIGRATIONS=./src/migrations/*.ts
-            export TYPEORM_MIGRATIONS_DIR=./src/migrations
+            # export TYPEORM_ENTITIES=./src/modules/domain/**/*.entity{.ts,.js}
+            # export TYPEORM_MIGRATIONS=./src/migrations/*.ts
+            # export TYPEORM_MIGRATIONS_DIR=./src/migrations
 
             cd backend
             npm install
@@ -360,6 +364,10 @@ jobs:
   deploy-backend:
     docker:
       - image: cimg/base:stable
+        environment:
+            TYPEORM_MIGRATIONS_DIR: ./migrations
+            TYPEORM_ENTITIES: ./modules/domain/**/*.entity{.ts,.js}
+            TYPEORM_MIGRATIONS: ./migrations/*.ts
     steps:
       - checkout
       - install_awscli
@@ -370,7 +378,7 @@ jobs:
       - attach_workspace:
           at: ~/
       - restore_cache:
-          keys: [backend-deps]
+          keys: [backend-build]
       - run:
           name: Install dependencies
           command: |
@@ -387,9 +395,9 @@ jobs:
       - run:
           name: Deploy backend
           command: |
-            export TYPEORM_MIGRATIONS_DIR=./migrations
-            export TYPEORM_ENTITIES=./modules/domain/**/*.entity{.ts,.js}
-            export TYPEORM_MIGRATIONS=./migrations/*.ts
+            # export TYPEORM_MIGRATIONS_DIR=./migrations
+            # export TYPEORM_ENTITIES=./modules/domain/**/*.entity{.ts,.js}
+            # export TYPEORM_MIGRATIONS=./migrations/*.ts
             
             cd .circleci/ansible
             cat inventory.txt
