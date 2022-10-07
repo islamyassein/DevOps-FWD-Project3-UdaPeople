@@ -355,8 +355,8 @@ jobs:
             aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
 
       # # # - slack_notify_on_faliure  
-      # - revert-migrations 
-      # - destroy-environment
+      - revert-migrations 
+      - destroy-environment
 
   deploy-backend:
     docker:
@@ -446,7 +446,7 @@ jobs:
       # Here's where you will add some code to rollback on failure
       # - slack_notify_on_failure  
       - revert-migrations 
-      # - destroy-environment
+      - destroy-environment
 
   cloudfront-update:
     docker: 
@@ -483,7 +483,7 @@ jobs:
       # Here's where you will add some code to rollback on failure 
       # - slack_notify_on_failure 
       - revert-migrations 
-      # - destroy-environment
+      - destroy-environment
 
   cleanup:
     docker:
