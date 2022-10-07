@@ -1,3 +1,5 @@
+Note: The below URLs are the latest one (always updated) due to changable AWS infrastructue with each pipeline: 
+
 1- Public Url to GitHub repository (not private) [URL01]
 
 https://github.com/islamyassein/DevOps-FWD-Project3-UdaPeople.git
@@ -5,7 +7,7 @@ https://github.com/islamyassein/DevOps-FWD-Project3-UdaPeople.git
 
 2- Public URL for your S3 Bucket (aka, your green candidate front-end) [URL02]
 
-http://udapeople-8256247.s3-website-us-east-1.amazonaws.com/#/employees
+http://udapeople-3703a12.s3-website-us-east-1.amazonaws.com/#/employees
 
 
 3- Public URL for your CloudFront distribution (aka, your blue production front-end) [URL03]
@@ -15,7 +17,7 @@ http://d2es341xlfb775.cloudfront.net/#/employees
 
 4- Public URLs to deployed application back-end in EC2 [URL04]
 
-http://54.157.206.31:3030/api/status
+http://35.174.26.65:3030/api/status
 
 
 5- Public URL to your Prometheus Server [URL05]
